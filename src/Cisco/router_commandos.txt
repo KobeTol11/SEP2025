@@ -1,0 +1,41 @@
+enable
+configure terminal
+
+interface gigabitEthernet 0/1.11
+encapsulation dot1Q 11
+ip address 192.168.207.49 255.255.255.248
+exit
+
+interface gigabitethernet 0/1.12
+encapsulation dot1Q 12
+ip address 192.168.207.129 255.255.255.128
+exit
+
+interface gigabitethernet 0/1.14
+encapsulation dot1Q 14
+ip address 192.168.207.17 255.255.255.240
+exit
+
+interface GigabitEthernet0/1
+description Router-on-a-Stick (Trunk naar Switch)
+no ip address
+no shutdown
+exit
+
+interface GigabitEthernet0/0
+description Uplink naar ISP
+ip address 192.168.207.2 255.255.255.252
+
+no shutdown
+exit
+
+
+ip dhcp pool Werknemers
+network 192.168.207.128 255.255.255.128
+default-router 192.168.207.129
+dns-server 192.168.207.49
+exit
+ip dhcp excluded-address 192.168.207.129
+ip route 0.0.0.0 0.0.0.0 192.168.207.1
+exit
+
