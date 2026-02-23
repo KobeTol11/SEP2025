@@ -1,0 +1,50 @@
+conf t
+ip access-list extended FIREWALL
+  remark *** INSIDE naar OUTSIDE ***
+  permit tcp 192.168.207.0 0.0.0.255 any eq 80
+  permit tcp 192.168.207.0 0.0.0.255 any eq 443
+  permit udp 192.168.207.0 0.0.0.255 any eq 53
+  permit udp 192.168.207.0 0.0.0.255 any eq 67
+  permit udp any eq 68 192.168.207.0 0.0.0.255
+  permit udp 192.168.207.0 0.0.0.255 any eq 69
+  permit icmp 192.168.207.0 0.0.0.255 any echo
+  permit icmp 192.168.207.0 0.0.0.255 any echo-reply
+  permit udp 192.168.207.0 0.0.0.255 any eq 1985
+  permit upd any any eq 1985
+  remark *** INSIDE naar INSIDE (netbios, RDP, etc) ***
+  permit tcp 192.168.207.0 0.0.0.255 192.168.207.0 0.0.0.255 eq 445
+  permit tcp 192.168.207.0 0.0.0.255 192.168.207.0 0.0.0.255 eq 3389
+  permit udp 192.168.207.0 0.0.0.255 192.168.207.0 0.0.0.255 eq 137
+  permit udp 192.168.207.0 0.0.0.255 192.168.207.0 0.0.0.255 eq 138
+  permit udp 192.168.207.0 0.0.0.255 192.168.207.0 0.0.0.255 eq 123
+  permit ip 192.168.207.0 0.0.0.255 192.168.207.0 0.0.0.255
+  remark *** BEVEILIGINGSLAST: ALLES ANDERS BLOK ***
+  deny   ip any any
+exit
+
+access-list 100 permit icmp 192.168.12.0 0.0.0.255 any           ! PING (ICMP)
+
+interface GigabitEthernet0/0/1
+ no ip access-group FIREWALL in
+
+interface GigabitEthernet0/0/1.11
+ no ip access-group FIREWALL in
+
+interface GigabitEthernet0/0/1.12
+ no ip access-group FIREWALL in
+
+interface GigabitEthernet0/0/1.14
+ no ip access-group FIREWALL in
+
+
+interface GigabitEthernet0/0/1
+ ip access-group FIREWALL in
+
+interface GigabitEthernet0/0/1.11
+ ip access-group FIREWALL in
+
+interface GigabitEthernet0/0/1.12
+ ip access-group FIREWALL in
+
+interface GigabitEthernet0/0/1.14
+ ip access-group FIREWALL in

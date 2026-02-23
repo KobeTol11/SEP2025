@@ -1,6 +1,3 @@
-Building configuration...
-
-Current configuration : 1193 bytes
 !
 version 15.1
 no service timestamps log datetime msec
@@ -48,14 +45,17 @@ spanning-tree mode pvst
 !
 !
 interface GigabitEthernet0/0
- description uplink naar ISP
- ip address 192.168.207.2 255.255.255.252
+ description Uplink naar ISP
+ ip address dhcp
+ ip nat outside
  duplex auto
  speed auto
 !
 interface GigabitEthernet0/1
- description Router-on-a-stick (Trunk naar switch)
- no ip address
+ description Router-on-a-Stick (Trunk naar Switch)
+ ip address 192.168.207.33 255.255.255.240
+ ip access-group FIREWALL in
+ ip nat inside
  duplex auto
  speed auto
 !
@@ -77,11 +77,19 @@ interface Vlan1
 !
 router rip
 !
+ip nat inside source list 1 interface GigabitEthernet0/0 overload
 ip classless
+ip route 0.0.0.0 0.0.0.0 192.168.207.1 
 !
 ip flow-export version 9
 !
 !
+access-list 1 permit 0.0.0.0 192.168.207.47
+access-list 1 permit 0.0.0.0 192.168.207.62
+access-list 1 permit 0.0.0.0 192.168.207.30
+access-list 1 permit 0.0.0.0 192.168.207.255
+ip access-list extended FIREWALL
+ permit tcp host 192.168.207.18 any eq 443
 !
 !
 !
@@ -97,3 +105,4 @@ line vty 0 4
 !
 !
 end
+

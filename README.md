@@ -3,10 +3,9 @@
 | Naam               | GitHub gebruikersnaam                                       |
 | :----------------- | :---------------------------------------------------------- |
 | Gilles De Meerleer | [DeMeerleerGilles](https://github.com/DeMeerleerGilles)     |
-| Ruben Van Bruyssel  | [Ruben-Van-Bruyssel](https://github.com/Ruben-Van-Bruyssel) |
+| Ruben Van Bruyssel | [Ruben-Van-Bruyssel](https://github.com/Ruben-Van-Bruyssel) |
 | Matthias Schoubben | [matthiaschoubben](https://github.com/matthiaschoubben)     |
-| Kobe Tollenaere    | [Kobe-Tollenaere](https://github.com/KobeTol11)                     |
-| Vince Van Hove  | [VanHoveVince](https://github.com/VanHoveVince)                     |
+| Kobe Tollenaere    | [Kobe-Tollenaere](https://github.com/KobeTol11)             |
 
 Dit is de repository voor het projectvak System Engineering Project.
 

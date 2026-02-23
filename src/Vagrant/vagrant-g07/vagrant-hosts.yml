@@ -36,18 +36,33 @@
 ---
 
 - name: web
-  ip: 192.168.207.31
+  ip: 192.168.207.60
   box: bento/almalinux-9
 
 - name: db
-  ip: 192.168.207.32
-  box: bento/almalinux-9
-
-- name: TFTP
-  ip: 192.168.207.33
+  ip: 192.168.207.52
   box: bento/almalinux-9
 
 - name: ReverseProxy
-  ip: 192.168.207.34
+  ip: 192.168.207.18
+  netmask: 255.255.255.240
   box: bento/almalinux-9
+
+- name: ReverseTest
+  ip: 192.168.207.18
+  box: bento/almalinux-9
+
+- name: tftp
+  ip: 192.168.207.35
+  box: bento/almalinux-9
+
+- name: jellyfin
+  ip: 192.168.207.61
+  box: bento/almalinux-9
+
+- name: NextCloud
+  ip: 192.168.207.55
+  box: bento/almalinux-9
+
+
 

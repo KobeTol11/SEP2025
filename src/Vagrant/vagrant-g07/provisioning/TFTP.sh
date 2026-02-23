@@ -1,76 +1,102 @@
-#! /bin/bash
-#
-# Provisioning script for TFTP
+#!/bin/bash
 
 #------------------------------------------------------------------------------
 # Bash settings
 #------------------------------------------------------------------------------
 
 # Enable "Bash strict mode"
-set -eou pipefail
+set -o errexit
+set -o nounset
+set -o pipefail
 
+#------------------------------------------------------------------------------
+# Variables
+#------------------------------------------------------------------------------
 
-# Install and configure firewalld if needed
-echo "Checking if firewalld is installed and running..."
-if ! systemctl is-active --quiet firewalld; then
-    echo "Installing and starting firewalld..."
-    sudo dnf install firewalld -y
-    sudo systemctl start firewalld
-    sudo systemctl enable firewalld
-else
-    echo "firewalld is already running."
-fi
+# TFTP directory
+readonly TFTP_DIR="/var/lib/tftpboot"
 
-# Allow TFTP traffic through the firewall
-echo "Configuring firewall to allow TFTP traffic..."
-sudo firewall-cmd --permanent --add-service=tftp
-sudo firewall-cmd --reload
+# Shared folder containing switch and router config files
+readonly SHARED_FOLDER="/vagrant/Cisco"
 
-# Update system and install TFTP server + xinetd
-echo "Installing TFTP-server and xinetd..."
-sudo dnf install -y tftp-server xinetd
+# TFTP service and socket files
+readonly TFTP_SERVICE_FILE="/etc/systemd/system/tftp.service"
+readonly TFTP_SOCKET_FILE="/etc/systemd/system/tftp.socket"
 
-# Configure TFTP service
-echo "Configuring TFTP service..."
-sudo tee /etc/systemd/system/tftp.service > /dev/null <<EOF
+#------------------------------------------------------------------------------
+# Functions
+#------------------------------------------------------------------------------
+
+log() {
+    echo "[INFO] $1"
+}
+
+error() {
+    echo "[ERROR] $1" >&2
+    exit 1
+}
+
+#------------------------------------------------------------------------------
+# Provision server
+#------------------------------------------------------------------------------
+
+sudo setenforce 1
+
+log "Starting TFTP server setup on ${HOSTNAME}"
+
+log "Installing TFTP server and client packages"
+dnf install -y tftp-server tftp || error "Failed to install TFTP packages"
+
+log "Configuring TFTP server"
+
+# Copy systemd service and socket files
+cp /usr/lib/systemd/system/tftp.service "${TFTP_SERVICE_FILE}" || error "Failed to copy tftp.service"
+cp /usr/lib/systemd/system/tftp.socket "${TFTP_SOCKET_FILE}" || error "Failed to copy tftp.socket"
+
+log "Configuring TFTP service file"
+cat <<EOF > "${TFTP_SERVICE_FILE}"
 [Unit]
-Description=TFTP Server
-After=network.target
+Description=Tftp Server
+Requires=tftp.socket
+Documentation=man:in.tftpd
 
 [Service]
-ExecStart=/usr/sbin/in.tftpd -c -p -s /var/lib/tftpboot
-TimeoutStartSec=30
+ExecStart=/usr/sbin/in.tftpd -c -p -s ${TFTP_DIR}
 StandardInput=socket
-Restart=always
-User=nobody
-Group=nobody
 
 [Install]
 WantedBy=multi-user.target
+Also=tftp.socket
 EOF
 
-# Reload systemd to recognize the new service
-sudo systemctl daemon-reload
+log "Creating TFTP directory and setting permissions"
+mkdir -p "${TFTP_DIR}" || error "Failed to create TFTP directory"
+chmod 777 "${TFTP_DIR}" || error "Failed to set permissions for TFTP directory"
 
-# Create TFTP directory and set permissions
-echo "Creating TFTP directory and setting permissions..."
-sudo mkdir -p /var/lib/tftpboot
-sudo chmod -R 777 /var/lib/tftpboot
-sudo chown -R nobody:nobody /var/lib/tftpboot
+# Fix SELinux issues so it is enforcing and allowing TFTP
+if command -v getenforce &>/dev/null && [[ "$(getenforce)" != "Disabled" ]]; then
+    log "Applying SELinux permissions for TFTP"
+    setsebool -P tftp_home_dir 1
+    restorecon -R "${TFTP_DIR}"
+fi
 
-# Start and enable TFTP service
-echo "Starting and enabling TFTP service..."
-sudo systemctl start tftp.service
-sudo systemctl enable tftp.service
+log "Copying switch and router config files from shared folder"
+if [[ -d "${SHARED_FOLDER}" ]]; then
+    cp "${SHARED_FOLDER}"/*.txt "${TFTP_DIR}/" || error "Failed to copy config files"
+    log "Config files copied successfully"
+else
+    error "Shared folder ${SHARED_FOLDER} does not exist"
+fi
 
-# Check the status of the TFTP service
-echo "Checking the status of TFTP service..."
-sudo systemctl status tftp.service
+log "Reloading systemd and starting TFTP service"
+systemctl daemon-reload
+systemctl enable --now tftp.socket tftp.service || error "Failed to enable and start TFTP service"
+systemctl enable tftp.service
 
-# Create a test file to verify TFTP functionality
-echo "Creating test file for TFTP..."
-echo "TFTP test" | sudo tee /var/lib/tftpboot/testfile.txt
-sudo chmod 666 /var/lib/tftpboot/testfile.txt
+sudo systemctl stop firewalld
 
-# Print success message
-echo "TFTP server installation and configuration completed!"
+log "Verifying TFTP service status"
+sudo systemctl start tftp
+systemctl status tftp.socket || error "TFTP service is not running"
+
+log "TFTP server setup completed successfully"

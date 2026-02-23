@@ -1,0 +1,212 @@
+!
+! Last configuration change at 15:44:11 UTC Wed May 14 2025
+!
+version 16.9
+no service timestamps debug uptime
+no service timestamps log uptime
+platform qfp utilization monitor load 80
+no platform punt-keepalive disable-kernel-core
+!
+hostname R1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+!
+no aaa new-model
+!
+ip dhcp excluded-address 192.168.207.129
+ip dhcp excluded-address 192.168.207.130 192.168.207.131
+!
+ip dhcp pool Werknemers
+ network 192.168.207.128 255.255.255.128
+ default-router 192.168.207.129
+ dns-server 192.168.207.54 1.1.1.1
+!
+!
+!
+login on-success log
+!
+!
+!
+!
+!
+!
+!
+subscriber templating
+multilink bundle-name authenticated
+!
+!
+!
+crypto pki trustpoint TP-self-signed-258368275
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-258368275
+ revocation-check none
+ rsakeypair TP-self-signed-258368275
+!
+!
+crypto pki certificate chain TP-self-signed-258368275
+ certificate self-signed 01
+  3082032E 30820216 A0030201 02020101 300D0609 2A864886 F70D0101 05050030
+  30312E30 2C060355 04031325 494F532D 53656C66 2D536967 6E65642D 43657274
+  69666963 6174652D 32353833 36383237 35301E17 0D323530 35313431 35323334
+  335A170D 33303031 30313030 30303030 5A303031 2E302C06 03550403 1325494F
+  532D5365 6C662D53 69676E65 642D4365 72746966 69636174 652D3235 38333638
+  32373530 82012230 0D06092A 864886F7 0D010101 05000382 010F0030 82010A02
+  82010100 91EF1EE2 F05239DE 551CA2A2 313D224C 8F221003 3EB128EA 6137CCDE
+  72B65237 4CE656B7 2BDDB315 7FCF6585 2309A48F 01F1E03A 3D95B296 9892DF1D
+  7CA64886 90265F40 C8A59879 D532B034 FD904A24 669D0D03 795F31AA 2252E472
+  0103BC27 FF6C7523 B6612E31 43D11850 D19F944E 79C75D5A C181BFFC 022E4C31
+  5336C135 40936914 5B5F3A98 3540EE03 B9F106C6 2B9EDBF3 63460CEF B69CD6FA
+  FE696B92 6844C8CE 90C8EE5E 7FF9D6DF 02C44433 A66846DB CA445947 BEA5B5EE
+  12838D37 C02AB1B2 DAABE735 DCE3CCA9 8CE58581 CB2CA729 F6D648F3 66360111
+  AC92AA72 0F812C4C 7229E164 1DC20C17 07EF44CE 858D6CE5 8387634A C13D61EF
+  71A60B0F 02030100 01A35330 51300F06 03551D13 0101FF04 05300301 01FF301F
+  0603551D 23041830 16801431 85329A22 B01FBC6E E9E288B8 0AE8A25A D3DB3930
+  1D060355 1D0E0416 04143185 329A22B0 1FBC6EE9 E288B80A E8A25AD3 DB39300D
+  06092A86 4886F70D 01010505 00038201 0100380B 6AEA9FDC 1A7D59FD 43F2D91B
+  55518AA4 9C31D0C7 4CFAB62F E59DFF24 EB1410D9 FD98C3ED 3448D55F 40F71B69
+  9FA11E0B DF374FA1 DA7CC9B2 9E8794AC ADD36C14 83A09A2D 7FFFFFB2 CF55C29F
+  15986A1D FA2AD9FD B5FDD62D B3067222 2638CDBF 94898215 F5DA994E 6BB25815
+  47484547 2B96E002 C0AED6D5 081388EA CEDDAFAF F39C66A0 8D93CB54 64F0F73F
+  80AF65EB 2E911166 DC502871 FEBBC5F8 0589C0F4 800A0524 43894B3C 8E6F6E2F
+  F95E9393 55BB48E4 DD24B033 5399F86B C298E7EB B2AC3065 FD6F3A35 92A9B5B7
+  145B4838 578A59D4 EAF6E227 84099F2B 9248A37A EB237666 8530D16D 6FA3179F
+  FE550EFA 6E595CDA E1A5BFF8 8F1C72F5 E9B4
+        quit
+!
+license udi pid ISR4321/K9 sn FDO21140M73
+no license smart enable
+diagnostic bootup level minimal
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+!
+!
+!
+redundancy
+ mode none
+!
+!
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0/0
+ description Uplink naar ISP
+ ip address 172.22.200.7 255.255.0.0
+ ip nat outside
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet0/0/1
+ description Router-on-a-Stick (Trunk naar Switch)
+ ip address 192.168.207.36 255.255.255.248
+ ip nat inside
+ standby 1 ip 192.168.207.33
+ standby 1 priority 110
+ standby 1 preempt
+ negotiation auto
+!
+interface GigabitEthernet0/0/1.11
+ encapsulation dot1Q 11
+ ip address 192.168.207.56 255.255.255.240
+ ip nat inside
+ standby 11 ip 192.168.207.49
+ standby 11 priority 110
+ standby 11 preempt
+!
+interface GigabitEthernet0/0/1.12
+ encapsulation dot1Q 12
+ ip address 192.168.207.130 255.255.255.128
+ ip nat inside
+ standby 12 ip 192.168.207.129
+ standby 12 priority 110
+ standby 12 preempt
+!
+interface GigabitEthernet0/0/1.14
+ encapsulation dot1Q 14
+ ip address 192.168.207.19 255.255.255.240
+ ip nat inside
+ standby 14 ip 192.168.207.17
+ standby 14 priority 110
+ standby 14 preempt
+!
+interface Serial0/1/0
+ no ip address
+!
+interface Serial0/1/1
+ no ip address
+!
+interface GigabitEthernet0
+ vrf forwarding Mgmt-intf
+ no ip address
+ shutdown
+ negotiation auto
+!
+ip forward-protocol nd
+no ip http server
+ip http authentication local
+ip http secure-server
+ip http client source-interface GigabitEthernet0/0/0
+ip tftp source-interface GigabitEthernet0/0/1
+ip nat inside source list 1 interface GigabitEthernet0/0/0 overload
+ip route 0.0.0.0 0.0.0.0 172.22.255.254
+!
+!
+!
+ip access-list extended FIREWALL
+ remark *** INSIDE naar OUTSIDE ***
+ permit tcp 192.168.207.0 0.0.0.255 any eq www
+ permit tcp 192.168.207.0 0.0.0.255 any eq 443
+ permit udp 192.168.207.0 0.0.0.255 any eq domain
+ permit udp 192.168.207.0 0.0.0.255 any eq bootps
+ permit udp any eq bootpc 192.168.207.0 0.0.0.255
+ permit udp 192.168.207.0 0.0.0.255 any eq tftp
+ permit icmp 192.168.207.0 0.0.0.255 any echo
+ permit icmp 192.168.207.0 0.0.0.255 any echo-reply
+ remark *** INSIDE naar INSIDE (netbios, RDP, etc) ***
+ permit tcp 192.168.207.0 0.0.0.255 192.168.207.0 0.0.0.255 eq 445
+ permit tcp 192.168.207.0 0.0.0.255 192.168.207.0 0.0.0.255 eq 3389
+ permit udp 192.168.207.0 0.0.0.255 192.168.207.0 0.0.0.255 eq netbios-ns
+ permit udp 192.168.207.0 0.0.0.255 192.168.207.0 0.0.0.255 eq netbios-dgm
+ permit udp 192.168.207.0 0.0.0.255 192.168.207.0 0.0.0.255 eq ntp
+ remark *** BEVEILIGINGSLAST: ALLES ANDERS BLOK ***
+ deny   ip any any
+ permit ip 192.168.207.0 0.0.0.255 192.168.207.0 0.0.0.255
+ permit udp 192.168.207.0 0.0.0.255 any eq 1985
+ permit udp any any eq 1985
+access-list 1 permit 192.168.207.0 0.0.0.255
+!
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ transport input none
+ stopbits 1
+line aux 0
+ stopbits 1
+line vty 0 4
+ login
+!
+!
+!
+!
+!
+!
+end

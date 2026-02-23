@@ -109,6 +109,12 @@ Tijdstabel:
 - Pingen naar buiten het netwerk lukt nog niet, we zitten hiermee vast.
 
 ### Feedback
+*	Verdeel nog beter in deelproblemen en zit niet te wachten op elkaar (je hebt geen TFTP nodig om je netwerk te testen)
+*	Probeer tegen volgende week minstens:
+    * connectie te maken tussen de verschillende VM’s met behulp van de fysieke apparatuur 
+    *	Enkele DNS records toe te voegen zodat die geresolved kunnen worden
+*	Schiet elkaar snel te hulp op cruciale punten. Als iedereen zit te wachten op een bepaalde service moet daar misschien een mannetje meer op gezet worden
+*	Documentatie is ook belangrijk, zorg dat die meegroeit met het project. Elk deeltje dat is afgerond moet een testplan meekrijgen, en best ook een stappenplan om het te kunnen reproduceren.
 
 #### Groep
 

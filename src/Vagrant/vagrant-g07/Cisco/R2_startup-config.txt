@@ -1,0 +1,114 @@
+!
+version 15.1
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+!
+hostname R1
+!
+!
+!
+!
+ip dhcp excluded-address 192.168.207.129
+ip dhcp excluded-address 192.168.207.130 192.168.207.131
+!
+ip dhcp pool Werknemers
+ network 192.168.207.128 255.255.255.128
+ default-router 192.168.207.129
+ dns-server 172.22.128.1
+!
+!
+!
+!
+!
+!
+!
+license udi pid CISCO1941/K9 sn FTX15246DIQ-
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0/0
+ description Uplink naar ISP
+ ip address 172.22.200.107 255.255.0.0
+ ip nat outside
+!
+interface GigabitEthernet0/0/1
+ description Router-on-a-Stick (Trunk naar Switch)
+ ip address 192.168.207.37 255.255.255.248
+ ip access-group FIREWALL in
+ ip nat inside
+ standby 1 ip 192.168.207.33
+ standby 1 preempt
+!
+interface GigabitEthernet0/0/1.11
+ encapsulation dot1Q 11
+ ip address 192.168.207.56 255.255.255.240
+ ip nat inside
+ standby 11 ip 192.168.207.49
+ standby 11 preempt
+!
+interface GigabitEthernet0/0/1.12
+ encapsulation dot1Q 12
+ ip address 192.168.207.131 255.255.255.240
+ ip nat inside
+ standby 12 ip 192.168.207.129
+ standby 12 preempt
+!
+interface GigabitEthernet0/0/1.14
+ encapsulation dot1Q 14
+ ip address 192.168.207.20 255.255.255.240
+ ip nat inside
+ standby 14 ip 192.168.207.17
+ standby 14 preempt
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+router rip
+!
+ip nat inside source list 1 interface GigabitEthernet0/0/0 overload
+ip nat inside source static tcp 192.168.207.37 80 172.22.200.107 80 
+ip classless
+ip route 0.0.0.0 0.0.0.0 172.22.255.254 
+!
+ip flow-export version 9
+!
+!
+ip access-list extended FIREWALL
+ permit tcp host 192.168.207.18 any eq 443
+ permit icmp 192.168.207.32 0.0.0.7 any echo
+ permit icmp any 192.168.207.32 0.0.0.7 echo-reply
+ permit udp any host 224.0.0.2 eq 1985
+access-list 1 permit 192.168.207.0 0.0.0.255
+!
+!
+!
+!
+!
+line con 0
+!
+line aux 0
+!
+line vty 0 4
+ login
+!
+!
+!
+end
+

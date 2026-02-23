@@ -1,0 +1,148 @@
+!
+! Last configuration change at 16:44:25 UTC Thu Apr 24 2025
+!
+version 16.9
+no service timestamps debug uptime
+no service timestamps log uptime
+platform qfp utilization monitor load 80
+no platform punt-keepalive disable-kernel-core
+!
+hostname R1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+!
+no aaa new-model
+!
+ip name-server 172.22.128.1
+ip dhcp excluded-address 192.168.207.129
+!
+ip dhcp pool Werknemers
+ network 192.168.207.128 255.255.255.128
+ default-router 192.168.207.129
+ dns-server 192.168.207.49
+!
+!
+!
+login on-success log
+!
+!
+!
+!
+!
+!
+!
+subscriber templating
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+license udi pid ISR4321/K9 sn FDO222743G0
+no license smart enable
+diagnostic bootup level minimal
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+!
+!
+!
+redundancy
+ mode none
+!
+!
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0/0
+ description Uplink naar ISP
+ ip address 172.22.200.7 255.255.0.0
+ ip nat outside
+ negotiation auto
+!
+interface GigabitEthernet0/0/1
+ description Trunk naar Switch
+ ip address 192.168.207.33 255.255.255.240
+ ip nat inside
+ negotiation auto
+!
+interface GigabitEthernet0/0/1.11
+ encapsulation dot1Q 11
+ ip address 192.168.207.49 255.255.255.240
+ ip nat inside
+!
+interface GigabitEthernet0/0/1.12
+ encapsulation dot1Q 12
+ ip address 192.168.207.129 255.255.255.128
+ ip nat inside
+!
+interface GigabitEthernet0/0/1.14
+ encapsulation dot1Q 14
+ ip address 192.168.207.17 255.255.255.240
+ ip nat inside
+!
+interface Serial0/1/0
+ no ip address
+!
+interface Serial0/1/1
+ no ip address
+!
+interface GigabitEthernet0
+ vrf forwarding Mgmt-intf
+ no ip address
+ negotiation auto
+!
+ip forward-protocol nd
+no ip http server
+ip http secure-server
+ip tftp source-interface GigabitEthernet0/0/1
+ip nat inside source list 1 interface GigabitEthernet0/0/0 overload
+ip route 0.0.0.0 0.0.0.0 192.168.207.1
+ip route 0.0.0.0 0.0.0.0 172.22.255.254
+ip route 0.0.0.0 0.0.0.0 dhcp
+!
+!
+!
+ip access-list extended FIREWALL
+ permit tcp host 192.168.207.18 any eq 443
+access-list 1 permit 0.0.0.0 192.168.207.47
+access-list 1 permit 0.0.0.0 192.168.207.62
+access-list 1 permit 0.0.0.0 192.168.207.30
+access-list 1 permit 0.0.0.0 192.168.207.255
+access-list 1 permit 192.168.207.0 0.0.0.255
+!
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ transport input none
+ stopbits 1
+line aux 0
+ stopbits 1
+line vty 0 4
+ login
+!
+!
+!
+!
+!
+!
+end

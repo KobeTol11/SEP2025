@@ -5,7 +5,7 @@
 require 'rbconfig'
 require 'yaml'
 
-# set default LC_ALL for all BOXES
+# Set default LC_ALL for all BOXES
 ENV["LC_ALL"] = "en_US.UTF-8"
 
 # Set your default base box here
@@ -51,10 +51,14 @@ end
 
 # Configure custom synced folders if defined
 def custom_synced_folders(vm, host)
-  return unless host.key?('synced_folders')
-  
-  host['synced_folders'].each do |folder|
-    vm.synced_folder folder['src'], folder['dest'], folder['options']
+  # Add the Cisco shared folder
+  vm.synced_folder "./Cisco", "/vagrant/Cisco", create: true
+
+  # Add additional synced folders if defined in the YAML
+  if host.key?('synced_folders')
+    host['synced_folders'].each do |folder|
+      vm.synced_folder folder['src'], folder['dest'], folder['options']
+    end
   end
 end
 
@@ -67,12 +71,13 @@ def forwarded_ports(vm, host)
   end
 end
 
+
+
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   hosts.each do |host|
     config.vm.define host['name'] do |node|
       node.vm.box = host['box'] ||= DEFAULT_BASE_BOX
       node.vm.box_url = host['box_url'] if host.key? 'box_url'
-
       node.vm.hostname = host['name']
       node.vm.network :private_network, **network_options(host)
       custom_synced_folders(node.vm, host)

@@ -1,0 +1,43 @@
+enable
+configure terminal
+
+hostname sw1
+
+vlan 14
+name DMZ
+vlan 1
+name Management
+vlan 11
+name Interne_servers
+vlan 12
+name Werkstations
+
+
+interface range FastEthernet0/1 - 6
+switchport access Vlan 12
+
+interface range FastEthernet0/7 - 12
+switchport access Vlan 11
+
+interface range FastEthernet0/13 - 18
+switchport access Vlan 14
+
+interface range FastEthernet0/19 - 24
+switchport access Vlan 1
+
+interface GigabitEthernet0/1
+switchport mode trunk
+switchport trunk native vlan 1
+switchport trunk allowed vlan 1,12,14,11
+
+interface FastEthernet0/1
+switchport mode access
+
+interface range FastEthernet0/7 - 8
+switchport mode access
+
+interface FastEthernet0/13
+switchport mode access
+
+end
+write memory
